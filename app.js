@@ -4,8 +4,11 @@ const logger = require('morgan');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const dotenv = require('dotenv');
-const routes = require('./routes');
-const createError = require('http-errors');
+const mongoose = require('mongoose');
+const passport = require('passport');
+const mongoURI = require('./config/keys').mongoURI;
+
+const usersRouter = require('./routes/api/users'); const createError = require('http-errors');
 
 // use dotenv
 dotenv.config({
@@ -24,8 +27,21 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // cookie parser
 app.use(cookieParser());
 
+// MongoDB setup
+mongoose.connect(mongoURI, { useNewUrlParser: true });
+mongoose.Promise = global.Promise;
+const db = mongoose.connection;
+
+db.on('error', console.error.bind(console, 'MongoDB connection error: '));
+db.once('open', () => console.log('MongoDB connected!'));
+
+// Passport middleware
+app.use(passport.initialize());
+
+// Passport Config
+require('./config/passport')(passport);
 // Handle routes
-app.use('/', routes);
+app.use('/api/users', usersRouter);
 
 // Handle 404 errors
 app.use((req, res, next) => {
