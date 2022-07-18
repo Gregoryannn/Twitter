@@ -1,8 +1,12 @@
 {
   "ExpandedNodes": [
     "",
+    "\\client",
+    "\\config",
+    "\\models",
+    "\\routes",
     "\\server"
   ],
-  "SelectedNode": "\\server\\index.js",
+  "SelectedNode": "\\package.json",
   "PreviewInSolutionExplorer": false
 }
