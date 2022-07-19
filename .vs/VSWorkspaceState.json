@@ -5,8 +5,10 @@
     "\\config",
     "\\models",
     "\\routes",
-    "\\server"
+    "\\routes\\api",
+    "\\server",
+    "\\validation"
   ],
-  "SelectedNode": "\\package.json",
+  "SelectedNode": "\\routes\\api\\users.js",
   "PreviewInSolutionExplorer": false
 }
