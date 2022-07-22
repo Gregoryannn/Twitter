@@ -34,6 +34,13 @@ router.get(
 router.get('/:user_id', (req, res, next) => {
     const { user_id } = req.params;
     const errors = {};
+
+    if (!user_id.match(/^[0-9a-fA-F]{24}$/)) {
+        // user_id is not valid ObjectId, findOne with this value will cause an error
+        errors.objectid = `user_id ${user_id} is not a valid ObjectId`;
+        return res.status(400).json(errors);
+    }
+
     Profile.findOne({ user: user_id })
         .populate('user', ['name', 'username', 'date'])
         .then(profile => {
@@ -103,7 +110,6 @@ router.post(
         // 2. Check if update profile or create new profile for the user
     }
 );
-
 // @route   DELETE api/profiles/
 // @desc    Delete user account (profile and user)
 // @access  Private
@@ -130,5 +136,4 @@ router.delete(
             .catch(err => next(err));
     }
 );
-
 module.exports = router;
