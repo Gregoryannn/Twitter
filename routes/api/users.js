@@ -8,6 +8,9 @@ const validator = require('validator');
 // Load validation functions
 const validateRegisterInput = require('../../validation/register');
 const validateLoginInput = require('../../validation/login');
+// Load utils functions
+const formatName = require('../../utils/formatName');
+
 // Load User Model
 const User = require('../../models/User');
 // @route   POST api/users/register
@@ -21,8 +24,6 @@ router.post('/register', (req, res, next) => {
     const { name, email, password } = req.body;
     let { username } = req.body;
 
-    // In case that the username consists of more than 1 word
-    username = username.split(' ').join('');
     // Check if user with that email/username already exists in db
     User.findOne({ email })
         .then(userByEmail => {
@@ -37,9 +38,10 @@ router.post('/register', (req, res, next) => {
                             'User with that username has already been created';
                         return res.status(400).json(errors);
                     }
+
                     // There is no user with that email/username in db, create the user
                     const newUser = new User({
-                        name,
+                        name: formatName(name),
                         username,
                         email,
                         password

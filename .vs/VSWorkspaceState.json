@@ -9,6 +9,6 @@
     "\\server",
     "\\validation"
   ],
-  "SelectedNode": "\\validation\\profile.js",
+  "SelectedNode": "\\routes\\api\\profiles.js",
   "PreviewInSolutionExplorer": false
 }
