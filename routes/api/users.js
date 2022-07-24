@@ -10,12 +10,9 @@ const validateRegisterInput = require('../../validation/register');
 const validateLoginInput = require('../../validation/login');
 // Load utils functions
 const formatName = require('../../utils/formatName');
-
-// Load User Model
 // Load Models
 const User = require('../../models/User');
 const Profile = require('../../models/Profile');
-
 // @route   POST api/users/register
 // @desc    Register new user
 // @access  Public
@@ -47,15 +44,14 @@ router.post('/register', (req, res, next) => {
                         email,
                         password
                     });
-
                     // Create empty profile for that user
                     const newProfile = new Profile({});
 
                     // Hash the password
                     bcrypt.genSalt(10, (err, salt) => {
-                        if (err) next(err);
+                        if (err) return next(err);
                         bcrypt.hash(newUser.password, salt, (err, hash) => {
-                            if (err) next(err);
+                            if (err) return next(err);
                             newUser.password = hash;
                             newUser
                                 .save()

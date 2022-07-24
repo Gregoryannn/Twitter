@@ -3,7 +3,8 @@ const Schema = mongoose.Schema;
 const ProfileSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
-        ref: 'users'
+        ref: 'users',
+        required: true
     },
     bio: {
         type: String
@@ -19,20 +20,20 @@ const ProfileSchema = new Schema({
     },
     following: [
         {
-                user: {
-                    type: Schema.Types.ObjectId,
-                    ref: 'profiles'
-                }
+            user: {
+                type: Schema.Types.ObjectId,
+                ref: 'users'
             }
-  ],
+        }
+    ],
     followers: [
         {
-                user: {
-                    type: Schema.Types.ObjectId,
-                    ref: 'profiles'
-                }
+            user: {
+                type: Schema.Types.ObjectId,
+                ref: 'users'
             }
-  ],
+        }
+    ],
     likes: [
         {
             tweet: {
@@ -57,6 +58,11 @@ const ProfileSchema = new Schema({
     // User background picture - uploaded by user
     backgroundPicture: {
         type: String
+    },
+    created: {
+        type: Date,
+        default: Date.now
     }
 });
+
 module.exports = Profile = mongoose.model('profiles', ProfileSchema);

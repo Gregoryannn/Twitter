@@ -8,74 +8,78 @@ const mongoose = require('mongoose');
 // Load validation functions
 const validateProfileInput = require('../../validation/profile');
 const validateObjectId = require('../../validation/objectId');
+
 // Load utils functions
 const formatName = require('../../utils/formatName');
-
 // @route   GET api/profiles/
 // @desc    Get logged in user profile
 // @access  Private
+
+
 router.get(
     '/',
     passport.authenticate('jwt', { session: false }),
     (req, res, next) => {
         const errors = {};
+
         Profile.findOne({ user: req.user._id })
-            .populate('user', ['name', 'username', 'date'])
+            .populate('user', ['name', 'username'])
             .then(profile => {
                 if (!profile) {
                     errors.noprofile = 'There is no profile for this user';
                     return res.status(404).json(errors);
                 }
+
                 res.json(profile);
             })
-            .catch(err => {
-                next(err);
-            });
+       .catch (err => next(err));
     }
 );
+
+
 // @route   GET api/profiles/all
 // @desc    Get all profiles
 // @access  Public
 router.get('/all', (req, res, next) => {
     const errors = {};
+
     Profile.find({})
         .populate('user', ['name', 'username', 'date'])
+        .populate('user', ['name', 'username'])
         .then(profiles => {
             if (!profiles) {
                 errors.noprofiles = 'There is no profiles';
                 return res.status(404).json(errors);
             }
+
             res.json(profiles);
         })
-        .catch(err => {
-            next(err);
-        });
+     .catch (err => next(err));
 });
+
 // @route   GET api/profiles/:user_id
 // @desc    Get profile by user ID
 // @access  Public
+
 router.get('/:user_id', (req, res, next) => {
     const { user_id } = req.params;
     const errors = {};
     const { idErrors, isValid } = validateObjectId(user_id);
-        if (!isValid) {
-            return res.status(400).json(idErrors);
-        }
+    if (!isValid) {
+        return res.status(400).json(idErrors);
+    }
 
-        Profile.findOne({ user: user_id })
-            .populate('user', ['name', 'username', 'date'])
-            .then(profile => {
-                if (!profile) {
-                    errors.noprofile = 'There is no profile for this user';
-                    return res.status(404).json(errors);
-                }
-
-                res.json(profile);
-            })
-         
-    .catch (err => next(err));
+    Profile.findOne({ user: user_id })
+        .populate('user', ['name', 'username'])
+        .then(profile => {
+            if (!profile) {
+                errors.noprofile = 'There is no profile for this user';
+                return res.status(404).json(errors);
+            }
+            res.json(profile);
+        })
+        .catch(err => next(err));
 });
-
 // @route   POST api/profiles/
 // @desc    Create or update user PROFILE
 // @access  Private
@@ -102,7 +106,7 @@ router.post(
             )
                 .then(updatedUser => {
                     if (!updatedUser) {
-                        errors.name = 'There was a problem with updating the name';
+                        errors.name = 'There was a problem with updating the user name';
                         return res.status(400).json(errors);
                     }
                     console.log('Name in user profile has been updated');
@@ -118,6 +122,7 @@ router.post(
                 profileFields[field] = req.body[field];
             }
         });
+
         Profile.findOne({ user: req.user._id }).then(profile => {
             if (profile) {
                 // Update the profile
@@ -137,6 +142,10 @@ router.post(
                 newProfile
                     .save()
                     .then(createdProfile => {
+                        if (!createdProfile) {
+                            errors.profilenotcreated =
+                                'There was a problem with creating new profile';
+                        }
                         response['createdProfile'] = createdProfile;
                         res.json(response);
                     })
@@ -163,7 +172,7 @@ router.delete(
                     .then(deletedUser => {
                         // But if there is no deletedUser I want to inform about it
                         if (!deletedUser) {
-                            errors.user = 'User with that id does not exists';
+                            errors.nouser = 'User with that ID does not exists';
                             return res.status(404).json(errors);
                         }
                         response['deletedUser'] = deletedUser;
@@ -178,7 +187,6 @@ router.delete(
             .catch(err => next(err));
     }
 );
-
 // @route   POST api/profiles/following/:user_id
 // @desc    Add or remove following
 // @access  Private
@@ -193,12 +201,10 @@ router.post(
               a) If yes => Remove it from array (unfollow)
               b) If not => Add it to the array (follow)
       */
-
         const errors = {};
         // user_id => The ID of a profile which authenticated user wants to follow
         // req.user._id => ID of authenticated user who want to follow/unfollow profile
         const { user_id } = req.params;
-
         // Validate user_id
         const { idErrors, isValid } = validateObjectId(user_id);
         if (!isValid) {
@@ -207,7 +213,7 @@ router.post(
 
         if (req.user._id === user_id) {
             return res.status(400).json({
-                message: 'You cannot follow or unfollow your own profile'
+                message: 'You cannot follow and unfollow your own profile'
             });
         }
 
@@ -215,16 +221,19 @@ router.post(
             .then(profile => {
                 Profile.findOne({ user: user_id }).then(someoneProfile => {
                     if (!someoneProfile) {
-                        errors.noprofile = 'There is no profile with that user ID';
+                        errors.nouser = 'That user does not exists';
                         return res.status(400).json(errors);
                     }
 
                     const index = profile.following.findIndex(
-                        follow => follow.user == user_id
+                    follow => follow._id == user_id
                     );
+
                     if (index > -1) {
                         // Index was found => unfollow
-                        profile.following.splice(index, 1);
+                        profile.following = profile.following.filter(follow => {
+                            return follow._id !== user_id;
+                        });
                         profile
                             .save()
                             .then(savedProfile => {
@@ -233,13 +242,12 @@ router.post(
                                         'There was a problem with saving that profile';
                                     return res.status(400).json(errors);
                                 }
-
                                 res.json(savedProfile);
                             })
                             .catch(err => next(err));
                     } else {
                         // Index was not found => follow that profile
-                        profile.following.push(user_id);
+                        profile.following.unshift(user_id);
                         profile
                             .save()
                             .then(savedProfile => {
@@ -248,7 +256,6 @@ router.post(
                                         'There was a problem with unfollowing that profile';
                                     return res.status(400).json(errors);
                                 }
-
                                 res.json(savedProfile);
                             })
                             .catch(err => next(err));
@@ -258,5 +265,4 @@ router.post(
             .catch(err => next(err));
     }
 );
-
 module.exports = router;
