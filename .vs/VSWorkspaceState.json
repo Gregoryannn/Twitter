@@ -1,12 +1,7 @@
 {
   "ExpandedNodes": [
     "",
-    "\\client",
-    "\\config",
-    "\\models",
-    "\\routes",
-    "\\server",
-    "\\utils",
+    "\\routes\\api",
     "\\validation"
   ],
   "SelectedNode": "\\validation\\register.js",
