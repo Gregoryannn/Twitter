@@ -16,8 +16,8 @@ module.exports = data => {
 
     const lengthForProps = {
         bio: { min: 2, max: 50 },
-        location: { min: 2, max: 25 },
-        website: { min: 3, max: 25 },
+        location: { min: 2, max: 30 },
+        website: { min: 3, max: 30 },
         name: { min: 2, max: 30 }
     };
 
@@ -25,71 +25,60 @@ module.exports = data => {
     console.log('entries', entries);
     entries.forEach(([property, value]) => {
         value = value.trim();
-        value = _.isEmpty(value) ? '' : value.toString();  // I do not specify isEmpty for things like bio, because user can fill empty bio to reset bio
+        value = _.isEmpty(value) ? '' : value.toString();
+        // I do not specify isEmpty for things like bio, because user can fill empty bio to reset bio
         // If req.body has a value, and the value is not empty, user do not want to clear the input, so I validate it
 
-        if (
-            property === 'bio' ||
-            property === 'location' ||
-            property === 'website' ||
-            property === 'name'
-        ) {
-            if (!_.isEmpty(value)) {
-                if (!validator.isLength(value, lengthForProps[property])) {
-                    errors[property] = `${property} must be between ${lengthForProps[property].min
-                        } and ${lengthForProps[property].max}`;
+  
+            if (profileInformation.includes(property)) {
+                if (!_.isEmpty(value)) {
+                    if (!validator.isLength(value, lengthForProps[property])) {
+                        errors[property] = `${property} must be between ${lengthForProps[property].min
+                            } and ${lengthForProps[property].max}`;
+                    }
                 }
             }
-        }
+            if (property === 'name') {
+                if (_.isEmpty(value)) {
+                    errors.name = 'You need to specify a value for name field';
+                } else {
+                    if (!validator.isAlphanumeric(value.split(' ').join(''), 'pl-PL')) {
+                        errors.name = 'Invalid name format';
+                    }
+                }
+            }
 
-        if (property === 'name') {
-            if (_.isEmpty(value)) {
-                errors.name = 'You need to specify a value for name field';
-            } else {
-                if (!validator.isAlphanumeric(value.split(' ').join(''), 'pl-PL')) {
-                    errors.name = 'Invalid name format';
-                }
-               
-            }
-        }
+   
 
-        // if (property === 'bio') {
-        //   if (!_.isEmpty(value)) {
-        //     if (!validator.isLength(value, { min: 2, max: 50 })) {
-        //       errors.bio = 'Bio must be between 2 and 50 characters';
-        //     }
-        //   }
-        // }
-
-        if (property === 'location') {
-            if (!_.isEmpty(value)) {
-                if (!validator.isAlphanumeric(value.split(' ').join(''), 'pl-PL')) {
-                    errors.location = 'Invalid location';
+            if (property === 'location') {
+                if (!_.isEmpty(value)) {
+                        if (!validator.isAlphanumeric(value.split(' ').join(''))) {
+                            errors.location = 'Invalid location';
+                        }
+                    }
                 }
-            }
-        }
-        if (property === 'website') {
-            if (!_.isEmpty(value)) {
-                if (!validator.isURL(value)) {
-                    errors.website = 'Website must be a URL';
+                if (property === 'website') {
+                    if (!_.isEmpty(value)) {
+                        if (!validator.isURL(value)) {
+                            errors.website = 'Website must be a URL';
+                        }
+                    }
                 }
-            }
-        }
-        if (property === 'birthday') {
-            if (!_.isEmpty(value)) {
-                if (!_.isDate(value)) {
-                    errors.birthday = 'Birthday must be a date';
+                if (property === 'birthday') {
+                    if (!_.isEmpty(value)) {
+                        if (!_.isDate(value)) {
+                            errors.birthday = 'Birthday must be a date';
+                        }
+                    }
                 }
-            }
-        }
-        // TODO:
-        // if (property === 'avatar') {
-        //   // Avatar will be uploaded by the user
-        // }
-        // if (property === 'backgroundPicture') {
-        //   // Background Picuture will be uploaded by the user
-        // }
-    });
+                // TODO:
+                // if (property === 'avatar') {
+                //   // Avatar will be uploaded by the user
+                // }
+                // if (property === 'backgroundPicture') {
+                //   // Background Picuture will be uploaded by the user
+                // }
+            });
     return {
         errors,
         isValid: _.isEmpty(errors)
