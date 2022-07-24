@@ -5,10 +5,10 @@
     "\\config",
     "\\models",
     "\\routes",
-    "\\routes\\api",
     "\\server",
+    "\\utils",
     "\\validation"
   ],
-  "SelectedNode": "\\routes\\api\\profiles.js",
+  "SelectedNode": "\\validation\\register.js",
   "PreviewInSolutionExplorer": false
 }

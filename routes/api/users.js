@@ -12,7 +12,10 @@ const validateLoginInput = require('../../validation/login');
 const formatName = require('../../utils/formatName');
 
 // Load User Model
+// Load Models
 const User = require('../../models/User');
+const Profile = require('../../models/Profile');
+
 // @route   POST api/users/register
 // @desc    Register new user
 // @access  Public
@@ -23,7 +26,6 @@ router.post('/register', (req, res, next) => {
     }
     const { name, email, password } = req.body;
     let { username } = req.body;
-
     // Check if user with that email/username already exists in db
     User.findOne({ email })
         .then(userByEmail => {
@@ -38,7 +40,6 @@ router.post('/register', (req, res, next) => {
                             'User with that username has already been created';
                         return res.status(400).json(errors);
                     }
-
                     // There is no user with that email/username in db, create the user
                     const newUser = new User({
                         name: formatName(name),
@@ -46,6 +47,10 @@ router.post('/register', (req, res, next) => {
                         email,
                         password
                     });
+
+                    // Create empty profile for that user
+                    const newProfile = new Profile({});
+
                     // Hash the password
                     bcrypt.genSalt(10, (err, salt) => {
                         if (err) next(err);
@@ -54,10 +59,20 @@ router.post('/register', (req, res, next) => {
                             newUser.password = hash;
                             newUser
                                 .save()
-                                .then(user => res.json(user))
-                                .catch(err => {
-                                    next(err);
-                                });
+                                .then(user => {
+                                    // Fill newProfile with user id
+                                    newProfile.user = user._id;
+                                    newProfile
+                                        .save()
+                                        .then(profile => {
+                                            res.json({
+                                                user,
+                                                profile
+                                            });
+                                        })
+                                        .catch(err => next(err));
+                                })
+                                .catch(err => next(err));
                         });
                     });
                 })

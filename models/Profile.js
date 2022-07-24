@@ -19,20 +19,20 @@ const ProfileSchema = new Schema({
     },
     following: [
         {
-            profile: {
-                type: Schema.Types.ObjectId,
-                ref: 'profiles'
+                user: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'profiles'
+                }
             }
-        }
-    ],
+  ],
     followers: [
         {
-            profile: {
-                type: Schema.Types.ObjectId,
-                ref: 'profiles'
+                user: {
+                    type: Schema.Types.ObjectId,
+                    ref: 'profiles'
+                }
             }
-        }
-    ],
+  ],
     likes: [
         {
             tweet: {
@@ -59,5 +59,4 @@ const ProfileSchema = new Schema({
         type: String
     }
 });
-
 module.exports = Profile = mongoose.model('profiles', ProfileSchema);
